@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'home_page.dart';
+import 'info_page.dart';
 
-void main(){
+void main() {
   runApp(
-    MaterialApp(
+    const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: TrangChu(),
     ),
   );
 }
+
 class TrangChu extends StatefulWidget {
   const TrangChu({super.key});
 
@@ -17,31 +20,37 @@ class TrangChu extends StatefulWidget {
 
 class _TrangChuState extends State<TrangChu> {
   var stt = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: stt,
-        children: [
-          Text('day la Trang chủ'),
-          Text('day la trang thông tin'),
-        ],
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: IndexedStack(
+          index: stt,
+          children: const [
+            HomePage(),
+            InfoPage(),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex : stt,
+        currentIndex: stt,
+        selectedItemColor: stt == 0 ? Colors.yellow : Colors.yellow,
+        unselectedItemColor: Colors.grey,
         onTap: (i) {
           setState(() {
             stt = i;
           });
         },
-        items : [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Trang chủ',
+            label: 'Trang chủ (home)',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.info),
-            label: 'Thông tin',
+            label: 'Thông tin (info)',
           ),
         ],
       ),

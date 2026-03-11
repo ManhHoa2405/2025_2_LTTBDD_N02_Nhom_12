@@ -6,11 +6,9 @@ class InfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Thông tin / Info'),
-      ),
+      backgroundColor: Colors.white,
       body: const Center(
-        child: Text('Thông tin của Nguyễn Đình Đạt sẽ hiển thị ở đây.'),
+        child: Text('day la trang thông tin'),
       ),
     );
   }
