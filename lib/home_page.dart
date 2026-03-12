@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -8,55 +9,93 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Danh sách lưu dữ liệu nằm gọn trong file này
-  List<String> danhSachCacMuc = [];
+  List<Map<String, String>> danhSachThuChi = [];
+  final _myBox = Hive.box('ghiChuBox');
+
+  @override
+  void initState() {
+    super.initState();
+    var duLieuCu = _myBox.get('danhSachThuChi');
+    
+    if (duLieuCu != null) {
+      danhSachThuChi = (duLieuCu as List).map((item) {
+        return {
+          'ten': item['ten'].toString(),
+          'tien': item['tien'].toString(),
+        };
+      }).toList();
+    }
+  }
+
+  // Hàm tính tổng số tiền đã chi
+  int tinhTongTien() {
+    int tong = 0;
+    for (var mucChi in danhSachThuChi) {
+      // Ép kiểu chữ (String) sang số nguyên (int) để cộng toán học
+      // Dùng tryParse để phòng trường hợp người dùng nhập chữ thay vì số
+      int tien = int.tryParse(mucChi['tien'] ?? '0') ?? 0;
+      tong += tien;
+    }
+    return tong;
+  }
 
   void _hienThiCuaSoThemMoi() {
-    TextEditingController _controller = TextEditingController();
+    TextEditingController _tenController = TextEditingController();
+    TextEditingController _tienController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text(
-            'Add New Task',
-            style: TextStyle(color: Color.fromARGB(136, 174, 161, 40), fontWeight: FontWeight.bold),
+            'Thêm khoản chi mới',
+            style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
           ),
-          content: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              hintText: 'Khởi tạo nhiệm vụ mới của bạn',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _tenController,
+                decoration: InputDecoration(
+                  hintText: 'Chi cho việc gì? (VD: Ăn sáng)',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                ),
               ),
-            ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _tienController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Số tiền (VD: 30000)',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.yellow[500],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                backgroundColor: Colors.orange,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              onPressed: () {
-                if (_controller.text.isNotEmpty) {
+              onPressed: () async {
+                if (_tenController.text.isNotEmpty && _tienController.text.isNotEmpty) {
                   setState(() {
-                    danhSachCacMuc.add(_controller.text);
+                    danhSachThuChi.add({
+                      'ten': _tenController.text,
+                      'tien': _tienController.text,
+                    });
                   });
+                  await _myBox.put('danhSachThuChi', danhSachThuChi);
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Save', style: TextStyle(color: Colors.white)),
+              child: const Text('Lưu', style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -66,27 +105,75 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Dùng Scaffold ở đây để nó tự giữ cái Nút bấm riêng cho trang này
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.grey[100],
       body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Đây là Trang chủ',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          // Phần hiển thị Tổng tiền đã chi
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  'Tổng số tiền đã chi',
+                  style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  // Gọi hàm tính tổng tiền ở đây
+                  '- ${tinhTongTien()} đ',
+                  style: const TextStyle(
+                    fontSize: 36, 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.red
+                  ),
+                ),
+              ],
             ),
           ),
+          
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Lịch sử chi tiêu',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+
+          // Phần danh sách các mục chi tiêu
           Expanded(
             child: ListView.builder(
-              itemCount: danhSachCacMuc.length,
+              itemCount: danhSachThuChi.length,
               itemBuilder: (context, index) {
                 return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(danhSachCacMuc[index]),
+                  elevation: 2,
+                  child: ListTile(
+                    leading: const Icon(Icons.monetization_on, color: Colors.orange, size: 30),
+                    title: Text(
+                      danhSachThuChi[index]['ten']!,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    trailing: Text(
+                      '- ${danhSachThuChi[index]['tien']} đ',
+                      style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
                   ),
                 );
               },
@@ -96,11 +183,9 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _hienThiCuaSoThemMoi,
-        backgroundColor: Colors.yellow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Icon(Icons.add, color: Colors.indigo, size: 30),
+        backgroundColor: Colors.orange,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),
     );
   }

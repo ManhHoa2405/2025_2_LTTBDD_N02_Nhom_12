@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'home_page.dart';
 import 'info_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('ghiChuBox');
+  
   runApp(
     const MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -19,7 +24,7 @@ class TrangChu extends StatefulWidget {
 }
 
 class _TrangChuState extends State<TrangChu> {
-  var stt = 0;
+  int stt = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +41,7 @@ class _TrangChuState extends State<TrangChu> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: stt,
-        selectedItemColor: stt == 0 ? Colors.yellow : Colors.yellow,
+        selectedItemColor: Colors.yellow[700],
         unselectedItemColor: Colors.grey,
         onTap: (i) {
           setState(() {
@@ -46,11 +51,11 @@ class _TrangChuState extends State<TrangChu> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Trang chủ (home)',
+            label: 'Trang chủ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.info),
-            label: 'Thông tin (info)',
+            label: 'Thông tin',
           ),
         ],
       ),
