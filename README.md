@@ -1,20 +1,49 @@
-<<<<<<< HEAD
-# app_so_thu_chi
+2026_LTTBDD_N02_Nhom_NguyenManhHoa
+Ứng dụng Sổ thu chi giúp người dùng:
 
-A new Flutter project.
+-Tạo, chỉnh sửa, xóa các mục chi tiêu.
 
-## Getting Started
+-Giao diện đơn giản, dễ sử dụng.
+Công nghệ sử dụng:
 
-This project is a starting point for a Flutter application.
+-Ngôn ngữ: Dart
 
-A few resources to get you started if this is your first Flutter project:
+-Framework: Flutter
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+-Database: Hive
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
-# 2025_2_LTTBDD_N02_Nhom_12
->>>>>>> 7c65c95eed09217af70b4d3186b62a226b4c72ff
+-IDE: Android Studio / VS Code
+Cấu trúc thư mục chính (Flutter): /lib
+
+├── l10n/ # Cài đặt ngôn ngữ en và vi cho app.
+
+├── data/ # Hive local storage - Hive database.
+
+├── main.dart # Điểm bắt đầu của ứng dụng
+
+├── models/ # Định nghĩa class Todo
+
+├── screens/ # Các màn hình (Home, AddTask, EditTask...)
+
+├── widgets/ # Các widget tái sử dụng
+
+Các chức năng chính:
+
+-Thêm mục chi tiêu mới và số tiền đã chi
+
+-Xem danh sách các khoản chi tiêu
+
+-Sửa nội dung khoản chi tiêu
+
+-Xóa các khoản chi tiêu
+Hướng phát triển tương lai
+
+-Thêm phần thu nhập, tổng thu nhập, dư ra hàng tháng
+
+-Thêm các khoản thu, chi theo ngày.
+
+- Cài ngân sách hàng tháng, ngân sách cho từng khoản khác nhau.
+
+- Thêm phần tiết kiệm hàng tháng
+
+-Đồng bộ hóa dữ liệu với cloud.
