@@ -23,45 +23,43 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Output: Text (Hiển thị tổng tiền)
   int get tongTien => danhSachThuChi.fold(0, (sum, item) => sum + (int.tryParse(item['tien'] ?? '0') ?? 0));
 
-  void _hienThiCuaSoThemMoi() {
-    // Input: TextField (Sử dụng để nhập văn bản và số)
-    final tenController = TextEditingController();
-    final tienController = TextEditingController();
+  void _hienThiCuaSo({int? index}) {
+    final tenController = TextEditingController(text: index != null ? danhSachThuChi[index]['ten'] : '');
+    final tienController = TextEditingController(text: index != null ? danhSachThuChi[index]['tien'] : '');
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Thêm khoản chi mới'),
-        content: Column( // Layout: Column
+        title: Text(index == null ? 'Thêm khoản chi mới' : 'Sửa khoản chi'),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: tenController, 
-              decoration: const InputDecoration(hintText: 'Tên khoản chi')
-            ),
+            TextField(controller: tenController, decoration: const InputDecoration(hintText: 'Tên khoản chi')),
             const SizedBox(height: 10),
-            TextField(
-              controller: tienController, 
-              keyboardType: TextInputType.number, 
-              decoration: const InputDecoration(hintText: 'Số tiền')
-            ),
+            TextField(controller: tienController, keyboardType: TextInputType.number, decoration: const InputDecoration(hintText: 'Số tiền')),
           ],
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Hủy')),
-          // Input: button (Dùng ElevatedButton làm nút bấm)
           ElevatedButton(
             onPressed: () async {
               if (tenController.text.isNotEmpty && tienController.text.isNotEmpty) {
-                setState(() => danhSachThuChi.add({'ten': tenController.text, 'tien': tienController.text}));
+                setState(() {
+                  if (index == null) {
+                    // Thêm mới
+                    danhSachThuChi.add({'ten': tenController.text, 'tien': tienController.text});
+                  } else {
+                    // Cập nhật
+                    danhSachThuChi[index] = {'ten': tenController.text, 'tien': tienController.text};
+                  }
+                });
                 await _myBox.put('danhSachThuChi', danhSachThuChi);
                 if (mounted) Navigator.pop(context);
               }
             },
-            child: const Text('Lưu'),
+            child: Text(index == null ? 'Lưu' : 'Cập nhật'), 
           ),
         ],
       ),
@@ -70,14 +68,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Combined: Scaffold (Cấu trúc cơ bản của trang)
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SỔ THU CHI'), // Output: Text
+        title: const Text('SỔ THU CHI'),
         backgroundColor: Colors.yellow,
         centerTitle: true,
       ),
-      body: Column( // Layout: Column
+      body: Column(
         children: [
           _buildHeader(),
           const Padding(
@@ -88,7 +85,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           Expanded(
-            child: ListView.builder( // Output: ListView
+            child: ListView.builder(
               itemCount: danhSachThuChi.length,
               itemBuilder: (context, index) => _buildListItem(index),
             ),
@@ -96,9 +93,9 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _hienThiCuaSoThemMoi,
+        onPressed: () => _hienThiCuaSo(),
         backgroundColor: Colors.orange,
-        child: const Icon(Icons.add), // Output: Icon
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -112,10 +109,10 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade300)
       ),
-      child: Row( // Layout: Row
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Tổng chi tiêu:'), // Output: Text
+          const Text('Tổng chi tiêu:'),
           Text(
             '- $tongTien đ', 
             style: const TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold)
@@ -130,14 +127,20 @@ class _HomePageState extends State<HomePage> {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       child: ListTile(
-        leading: const Icon(Icons.shopping_cart, color: Colors.orange), // Output: Icon
-        title: Text(item['ten']!), // Output: Text
-        trailing: Row( // Layout: Row (Kết hợp Icon và Text ở đuôi dòng)
+        leading: const Icon(Icons.shopping_cart, color: Colors.orange),
+        title: Text(item['ten']!),
+        trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('${item['tien']} đ', style: const TextStyle(color: Colors.red)),
-            const SizedBox(width: 10),
-            // Input: GestureDetector (Dùng để bắt sự kiện nhấn xóa)
+            const SizedBox(width: 15),
+            
+            GestureDetector(
+              onTap: () => _hienThiCuaSo(index: index), 
+              child: const Icon(Icons.edit, color: Colors.blue),
+            ),
+            
+            const SizedBox(width: 15),
             GestureDetector(
               onTap: () async {
                 setState(() => danhSachThuChi.removeAt(index));
