@@ -15,168 +15,82 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    var duLieuCu = _myBox.get('danhSachThuChi');
-    
-    if (duLieuCu != null) {
-      danhSachThuChi = (duLieuCu as List).map((item) {
-        return {
-          'ten': item['ten'].toString(),
-          'tien': item['tien'].toString(),
-        };
-      }).toList();
+    final data = _myBox.get('danhSachThuChi');
+    if (data != null) {
+      danhSachThuChi = List<Map<String, String>>.from(
+        (data as List).map((e) => Map<String, String>.from(e)),
+      );
     }
   }
 
-  // Hàm tính tổng số tiền đã chi
-  int tinhTongTien() {
-    int tong = 0;
-    for (var mucChi in danhSachThuChi) {
-      // Ép kiểu chữ (String) sang số nguyên (int) để cộng toán học
-      // Dùng tryParse để phòng trường hợp người dùng nhập chữ thay vì số
-      int tien = int.tryParse(mucChi['tien'] ?? '0') ?? 0;
-      tong += tien;
-    }
-    return tong;
-  }
+  // Output: Text (Hiển thị tổng tiền)
+  int get tongTien => danhSachThuChi.fold(0, (sum, item) => sum + (int.tryParse(item['tien'] ?? '0') ?? 0));
 
   void _hienThiCuaSoThemMoi() {
-    TextEditingController _tenController = TextEditingController();
-    TextEditingController _tienController = TextEditingController();
+    // Input: TextField (Sử dụng để nhập văn bản và số)
+    final tenController = TextEditingController();
+    final tienController = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text(
-            'Thêm khoản chi mới',
-            style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _tenController,
-                decoration: InputDecoration(
-                  hintText: 'Chi cho việc gì? (VD: Ăn sáng)',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _tienController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Số tiền (VD: 30000)',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+      builder: (context) => AlertDialog(
+        title: const Text('Thêm khoản chi mới'),
+        content: Column( // Layout: Column
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: tenController, 
+              decoration: const InputDecoration(hintText: 'Tên khoản chi')
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              onPressed: () async {
-                if (_tenController.text.isNotEmpty && _tienController.text.isNotEmpty) {
-                  setState(() {
-                    danhSachThuChi.add({
-                      'ten': _tenController.text,
-                      'tien': _tienController.text,
-                    });
-                  });
-                  await _myBox.put('danhSachThuChi', danhSachThuChi);
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Lưu', style: TextStyle(color: Colors.white)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: tienController, 
+              keyboardType: TextInputType.number, 
+              decoration: const InputDecoration(hintText: 'Số tiền')
             ),
           ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Hủy')),
+          // Input: button (Dùng ElevatedButton làm nút bấm)
+          ElevatedButton(
+            onPressed: () async {
+              if (tenController.text.isNotEmpty && tienController.text.isNotEmpty) {
+                setState(() => danhSachThuChi.add({'ten': tenController.text, 'tien': tienController.text}));
+                await _myBox.put('danhSachThuChi', danhSachThuChi);
+                if (mounted) Navigator.pop(context);
+              }
+            },
+            child: const Text('Lưu'),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Combined: Scaffold (Cấu trúc cơ bản của trang)
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: Column(
+      appBar: AppBar(
+        title: const Text('SỔ THU CHI'), // Output: Text
+        backgroundColor: Colors.yellow,
+        centerTitle: true,
+      ),
+      body: Column( // Layout: Column
         children: [
-          // Phần hiển thị Tổng tiền đã chi
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.all(16.0),
-            padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                const Text(
-                  'Tổng số tiền đã chi',
-                  style: TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  // Gọi hàm tính tổng tiền ở đây
-                  '- ${tinhTongTien()} đ',
-                  style: const TextStyle(
-                    fontSize: 36, 
-                    fontWeight: FontWeight.bold, 
-                    color: Colors.red
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
+          _buildHeader(),
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: EdgeInsets.all(16.0),
             child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Lịch sử chi tiêu',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              alignment: Alignment.centerLeft, 
+              child: Text('Lịch sử', style: TextStyle(fontWeight: FontWeight.bold))
             ),
           ),
-
-          // Phần danh sách các mục chi tiêu
           Expanded(
-            child: ListView.builder(
+            child: ListView.builder( // Output: ListView
               itemCount: danhSachThuChi.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  elevation: 2,
-                  child: ListTile(
-                    leading: const Icon(Icons.monetization_on, color: Colors.orange, size: 30),
-                    title: Text(
-                      danhSachThuChi[index]['ten']!,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    trailing: Text(
-                      '- ${danhSachThuChi[index]['tien']} đ',
-                      style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                );
-              },
+              itemBuilder: (context, index) => _buildListItem(index),
             ),
           ),
         ],
@@ -184,8 +98,55 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _hienThiCuaSoThemMoi,
         backgroundColor: Colors.orange,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
+        child: const Icon(Icons.add), // Output: Icon
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300)
+      ),
+      child: Row( // Layout: Row
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('Tổng chi tiêu:'), // Output: Text
+          Text(
+            '- $tongTien đ', 
+            style: const TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold)
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildListItem(int index) {
+    final item = danhSachThuChi[index];
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      child: ListTile(
+        leading: const Icon(Icons.shopping_cart, color: Colors.orange), // Output: Icon
+        title: Text(item['ten']!), // Output: Text
+        trailing: Row( // Layout: Row (Kết hợp Icon và Text ở đuôi dòng)
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('${item['tien']} đ', style: const TextStyle(color: Colors.red)),
+            const SizedBox(width: 10),
+            // Input: GestureDetector (Dùng để bắt sự kiện nhấn xóa)
+            GestureDetector(
+              onTap: () async {
+                setState(() => danhSachThuChi.removeAt(index));
+                await _myBox.put('danhSachThuChi', danhSachThuChi);
+              },
+              child: const Icon(Icons.delete, color: Colors.grey),
+            ),
+          ],
+        ),
       ),
     );
   }
