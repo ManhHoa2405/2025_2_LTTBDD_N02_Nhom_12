@@ -1,82 +1,56 @@
 import 'package:flutter/material.dart';
 
 class InfoPage extends StatelessWidget {
-  const InfoPage({super.key});
+  final bool isVietnamese; 
+
+  const InfoPage({super.key, required this.isVietnamese});
 
   @override
   Widget build(BuildContext context) {
-    //Combined: Scaffold
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('THÔNG TIN'),
-        backgroundColor: Colors.yellow,
-        centerTitle: true,
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      // LAYOUT: Sử dụng Column để xếp dọc các phần tử
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            // OUTPUT: Sử dụng Image để hiển thị ảnh minh họa
+            child: Image.network(
+              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg', 
+              height: 100,
+            ),
+          ),
+          const SizedBox(height: 30),
+          
+          _buildRow(Icons.group, 'Nhóm: Nhóm 12', 'Group: Group 12'),
+          const SizedBox(height: 20),
+          _buildRow(Icons.person, 'Thành viên:\nNguyễn Mạnh Hòa - 23010254', 'Member:\nNguyen Manh Hoa - 23010254'),
+          const SizedBox(height: 20),
+          _buildRow(Icons.school, 'Lớp: lttbđ', 'Class: lttbđ'),
+          const SizedBox(height: 20),
+          _buildRow(Icons.link, 'Link github: https://github.com/ManhHoa2405/2025_2_LTTBDD_N02_Nhom_12', 'GitHub Link: https://github.com/ManhHoa2405/2025_2_LTTBDD_N02_Nhom_12', isLink: true),
+        ],
       ),
-      
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        //Layout: Column (Xếp dọc)
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            
-            //Output: Image
-            Center(
-              child: Image.network(
-                'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg', 
-                height: 100,
-              ),
-            ),
-            const SizedBox(height: 30),
+    );
+  }
 
-            // Dòng 1: Nhóm 12
-            Row(
-              children: [
-                const Icon(Icons.group, color: Colors.orange, size: 30),
-                const SizedBox(width: 15),
-                const Text('Nhóm: Nhóm 12', style: TextStyle(fontSize: 18)),
-              ],
+  Widget _buildRow(IconData icon, String viText, String enText, {bool isLink = false}) {
+    // LAYOUT: Sử dụng Row để xếp ngang Icon và Text
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: Colors.amber, size: 30),
+        const SizedBox(width: 15),
+        Expanded(
+          child: Text(
+            isVietnamese ? viText : enText, 
+            style: TextStyle(
+              fontSize: 18, 
+              color: isLink ? Colors.blue : Colors.black, 
             ),
-            const SizedBox(height: 20),
-
-            // Dòng 2: Thành viên
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.person, color: Colors.orange, size: 30),
-                const SizedBox(width: 15),
-                const Text('Thành viên:\nNguyễn Mạnh Hòa - 23010254', style: TextStyle(fontSize: 18)), 
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Dòng 3: Lớp
-            Row(
-              children: [
-                const Icon(Icons.school, color: Colors.orange, size: 30),
-                const SizedBox(width: 15),
-                const Text('Lớp: lttbđ', style: TextStyle(fontSize: 18)),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Dòng 4: Link github 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.link, color: Colors.orange, size: 30),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: const Text(
-                    'Link github: https://github.com/ManhHoa2405/2025_2_LTTBDD_N02_Nhom_12', 
-                    style: TextStyle(fontSize: 18)
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
